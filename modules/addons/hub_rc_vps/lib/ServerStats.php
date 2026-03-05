@@ -59,13 +59,15 @@ class ServerStats
             }
 
             // Run all commands in a single session for efficiency
-            // Webapp detection: find RunCloud FPM pool configs in /etc/phpXXrc/fpm.d/
+            // Webapp detection: scan FPM sockets in /run/, exclude system sockets, find PHP version via process tree
+            $webappCmd = 'masters=""; while IFS= read -r line; do pid=$(echo "$line" | awk \'{print $1}\'); ver=$(echo "$line" | grep -oP "php\K[0-9]+"); masters="$masters $pid:$ver"; done < <(ps -eo pid,args 2>/dev/null | grep "php-fpm: master" | grep -v grep); for sock in /run/*.sock; do [ -S "$sock" ] || continue; name=$(basename "$sock" .sock); echo "$name" | grep -qiE "^(php[0-9]|mysql|fail2ban|supervisor|irq|systemd|dbus|docker|containerd|snapd)" && continue; ppid=$(ps -eo ppid,args 2>/dev/null | grep "pool $name" | grep -v grep | head -1 | awk \'{print $1}\'); ver=""; if [ -n "$ppid" ]; then for m in $masters; do mpid=${m%%:*}; mver=${m##*:}; [ "$mpid" = "$ppid" ] && ver=$mver && break; done; fi; echo "$name|$ver"; done 2>/dev/null';
+
             $commands = implode(' && echo "---SEPARATOR---" && ', [
                 'cat /proc/loadavg',
                 'free -m',
                 'df -BM /',
                 'cat /proc/uptime',
-                'for f in /etc/php*rc/fpm.d/app-*.conf; do [ -f "$f" ] && dir=$(dirname "$f") && ver=$(echo "$dir" | grep -oP "php\K[0-9]+") && app=$(basename "$f" .conf) && echo "$app|$ver"; done 2>/dev/null || echo ""',
+                $webappCmd,
             ]);
 
             $output = $ssh->exec($commands);
