@@ -21,8 +21,20 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($params) {
 
     $service = $params['service'];
 
-    // Get the dedicated IP from the service
-    $dedicatedIp = trim($service->dedicatedip ?? '');
+    // Get the dedicated IP (and optional port) from the service
+    // Supports format "IP" or "IP:PORT"
+    $dedicatedIpRaw = trim($service->dedicatedip ?? '');
+    $sshPort = 22;
+    if (strpos($dedicatedIpRaw, ':') !== false) {
+        [$dedicatedIp, $portStr] = explode(':', $dedicatedIpRaw, 2);
+        $dedicatedIp = trim($dedicatedIp);
+        $sshPort = (int) $portStr;
+        if ($sshPort < 1 || $sshPort > 65535) {
+            $sshPort = 22;
+        }
+    } else {
+        $dedicatedIp = $dedicatedIpRaw;
+    }
     if (empty($dedicatedIp) || !filter_var($dedicatedIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
         return '';
     }
@@ -45,7 +57,7 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($params) {
     $cacheTtl = (int) ($settings['cache_ttl'] ?? 300);
 
     // Determine SSH authentication method
-    $serverStats = new \HubRcVps\ServerStats($dedicatedIp, 22, 10);
+    $serverStats = new \HubRcVps\ServerStats($dedicatedIp, $sshPort, 10);
 
     if (!empty($sshKeyPath) && file_exists($sshKeyPath)) {
         // Key-based auth
