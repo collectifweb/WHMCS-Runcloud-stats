@@ -1,0 +1,15 @@
+# Dependencies
+modules/addons/hub_rc_vps/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/

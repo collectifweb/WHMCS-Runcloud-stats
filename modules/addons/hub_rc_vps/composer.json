@@ -1,0 +1,12 @@
+{
+    "name": "collectif-hub/hub-rc-vps",
+    "description": "WHMCS addon module - VPS server stats via SSH",
+    "require": {
+        "phpseclib/phpseclib": "~3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "HubRcVps\\": "lib/"
+        }
+    }
+}
