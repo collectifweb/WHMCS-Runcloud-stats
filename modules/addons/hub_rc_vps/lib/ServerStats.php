@@ -59,12 +59,13 @@ class ServerStats
             }
 
             // Run all commands in a single session for efficiency
+            // Webapp detection: find RunCloud FPM pool configs in /etc/phpXXrc/fpm.d/
             $commands = implode(' && echo "---SEPARATOR---" && ', [
                 'cat /proc/loadavg',
                 'free -m',
                 'df -BM /',
                 'cat /proc/uptime',
-                'ls /home/runcloud/webapps/ 2>/dev/null || echo ""',
+                'for f in /etc/php*rc/fpm.d/app-*.conf; do [ -f "$f" ] && dir=$(dirname "$f") && ver=$(echo "$dir" | grep -oP "php\K[0-9]+") && app=$(basename "$f" .conf) && echo "$app|$ver"; done 2>/dev/null || echo ""',
             ]);
 
             $output = $ssh->exec($commands);
@@ -203,17 +204,35 @@ class ServerStats
     }
 
     /**
-     * Parse `ls /home/runcloud/webapps/` output.
-     * Returns list of webapp directory names.
+     * Parse RunCloud FPM pool config listing.
+     * Input format: "app-name|phpversion" per line (e.g. "app-upll|74")
+     * Returns array of ['name' => ..., 'php' => ...].
      */
     private function parseWebapps(string $raw): array
     {
         if (empty($raw)) {
             return [];
         }
-        $names = preg_split('/\s+/', trim($raw));
-        return array_filter($names, function ($name) {
-            return !empty($name);
-        });
+
+        $webapps = [];
+        $lines = explode("\n", trim($raw));
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line) || strpos($line, '|') === false) {
+                continue;
+            }
+            [$name, $ver] = explode('|', $line, 2);
+            // Format version: "82" -> "8.2", "74" -> "7.4"
+            $phpVersion = '';
+            if (strlen($ver) >= 2) {
+                $phpVersion = $ver[0] . '.' . substr($ver, 1);
+            }
+            $webapps[] = [
+                'name' => $name,
+                'php' => $phpVersion,
+            ];
+        }
+
+        return $webapps;
     }
 }

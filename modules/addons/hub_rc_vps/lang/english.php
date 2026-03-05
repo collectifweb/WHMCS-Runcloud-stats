@@ -7,5 +7,7 @@ $strings = [
     'memory' => 'Memory',
     'disk' => 'Disk',
     'webapps' => 'Web Applications',
+    'webapp_name' => 'Name',
     'last_updated' => 'Last updated',
+    'stats_unavailable' => 'Server statistics are temporarily unavailable.',
 ];

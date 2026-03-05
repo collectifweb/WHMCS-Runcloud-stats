@@ -10,6 +10,7 @@ modules/addons/hub_rc_vps/vendor/
 # OS
 .DS_Store
 Thumbs.db
+.env
 
 # Claude
 .claude/

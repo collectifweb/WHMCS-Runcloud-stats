@@ -111,7 +111,8 @@ function hub_rc_vps_output($vars)
         $testIp = isset($_POST['test_ip']) ? trim($_POST['test_ip']) : '';
         $testPort = isset($_POST['test_port']) ? (int) $_POST['test_port'] : 22;
 
-        if (!empty($testIp)) {
+        // Validate IP format to prevent SSRF
+        if (!empty($testIp) && filter_var($testIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
             $stats = new \HubRcVps\ServerStats($testIp, $testPort);
 
             $sshKeyPath = trim($vars['ssh_key_path']);
