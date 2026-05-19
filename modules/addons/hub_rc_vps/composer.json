@@ -3,7 +3,7 @@
     "description": "WHMCS addon module - VPS server stats via SSH (RunCloud-aware)",
     "type": "whmcs-addon",
     "license": "MIT",
-    "homepage": "https://github.com/collectifweb/HUB_RC-VPS",
+    "homepage": "https://github.com/collectifweb/WHMCS-Runcloud-stats",
     "authors": [
         {
             "name": "Alexandre Alves",

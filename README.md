@@ -156,7 +156,7 @@ This approach works for both `root` and `runcloud` SSH users (no privileged file
 
 Pull requests are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-For bug reports and feature requests, please use the [GitHub issue tracker](https://github.com/collectifweb/HUB_RC-VPS/issues).
+For bug reports and feature requests, please use the [GitHub issue tracker](https://github.com/collectifweb/WHMCS-Runcloud-stats/issues).
 
 ## License
 

@@ -4,7 +4,7 @@ Thanks for your interest in improving HUB RunCloud VPS Stats!
 
 ## Reporting bugs
 
-Open an issue at https://github.com/collectifweb/HUB_RC-VPS/issues and include:
+Open an issue at https://github.com/collectifweb/WHMCS-Runcloud-stats/issues and include:
 
 - WHMCS version
 - PHP version
