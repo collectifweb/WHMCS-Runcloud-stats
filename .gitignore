@@ -1,6 +1,11 @@
 # Dependencies
 modules/addons/hub_rc_vps/vendor/
 
+# Module runtime files (never commit these)
+modules/addons/hub_rc_vps/.ssh_key
+modules/addons/hub_rc_vps/.ssh_key.pub
+modules/addons/hub_rc_vps/.debug.log
+
 # IDE
 .idea/
 .vscode/

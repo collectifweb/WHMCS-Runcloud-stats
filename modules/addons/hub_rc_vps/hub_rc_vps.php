@@ -25,7 +25,7 @@ function hub_rc_vps_config()
 {
     return [
         'name' => 'HUB RunCloud VPS Stats',
-        'description' => 'Affiche les statistiques des serveurs VPS (load, mémoire, disque, uptime) sur la page produit du client via SSH.',
+        'description' => 'Displays VPS server statistics (load, memory, disk, uptime) on the client product details page via SSH.',
         'author' => 'Collectif HUB',
         'language' => 'english',
         'version' => '1.0.0',

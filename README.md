@@ -1,146 +1,163 @@
 # HUB RunCloud VPS Stats
 
-Module WHMCS addon pour [Collectif HUB](https://collectif-hub.ca) qui affiche les statistiques des serveurs VPS directement sur la page produit du portail client.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![WHMCS](https://img.shields.io/badge/WHMCS-8.x%2B-blue)](https://www.whmcs.com/)
+[![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4)](https://www.php.net/)
 
-## Fonctionnalités
+WHMCS addon module that displays live VPS server statistics (load, memory, disk, uptime, web apps) directly on the client product details page, by connecting to the VPS over SSH.
 
-- **Load average** (1/5/15 min) avec indicateur couleur
-- **Mémoire** : barre de progression + valeurs MB
-- **Disque** : barre de progression + valeurs GB
-- **Uptime** : formaté en jours/heures/minutes
-- **Web Applications** : liste des webapps RunCloud avec version PHP
-- Cache DB configurable (défaut 5 min)
-- Bilingue (FR/EN)
+Originally built for [Collectif HUB](https://collectif-hub.ca) and released as open source for the WHMCS / RunCloud community.
 
-## Prérequis
+> Module addon WHMCS qui affiche les statistiques temps réel des serveurs VPS (charge, mémoire, disque, uptime, applications web) directement sur la page produit du client, via une connexion SSH.
+
+---
+
+## Features / Fonctionnalités
+
+- **Load average** (1 / 5 / 15 min) with color indicator
+- **Memory** progress bar + MB values
+- **Disk** progress bar + GB values
+- **Uptime** formatted (days / hours / minutes)
+- **Web Applications** list with PHP version (RunCloud-aware)
+- Configurable DB-backed cache (default 5 min)
+- Bilingual (EN / FR), auto-detects the client language
+- Hardened against SSRF, XSS, path traversal
+
+## Requirements / Prérequis
 
 - WHMCS 8.x+
 - PHP 7.4+
-- Accès SSH depuis le serveur WHMCS vers les VPS
-- Serveurs VPS gérés par RunCloud
+- SSH connectivity from the WHMCS server to the VPS hosts
+- VPS managed by RunCloud (recommended) or any Linux host exposing `/proc/loadavg`, `free`, `df`, `/proc/uptime`
 
 ## Installation
 
-1. Copier le dossier `modules/addons/hub_rc_vps/` dans votre installation WHMCS :
+1. Copy `modules/addons/hub_rc_vps/` into your WHMCS install:
    ```
    /your-whmcs/modules/addons/hub_rc_vps/
    ```
 
-2. Installer les dépendances :
+2. Install dependencies:
    ```bash
    cd /your-whmcs/modules/addons/hub_rc_vps/
    composer install --no-dev
    ```
 
-3. Activer le module dans WHMCS Admin :
-   - Setup > Addon Modules > HUB RunCloud VPS Stats > Activate
+3. Activate the module in WHMCS Admin:
+   - Setup → Addon Modules → HUB RunCloud VPS Stats → **Activate**
 
-4. Configurer le module :
-   - **SSH Private Key Path** : chemin vers la clé SSH privée sur le serveur WHMCS
-   - **SSH Username** : utilisateur SSH (recommandé : `runcloud`)
-   - **Cache TTL** : durée du cache en secondes (défaut : 300)
+4. Configure:
+   - **SSH Private Key Path** – absolute path to the SSH private key on the WHMCS server
+   - **SSH Username** – SSH user (recommended: `runcloud`)
+   - **Cache TTL** – cache duration in seconds (default: 300)
 
-## Configuration SSH
+## SSH Setup / Configuration SSH
 
-### 1. Générer la clé SSH sur le serveur WHMCS
+### 1. Generate the SSH key on the WHMCS server
 
 ```bash
 ssh-keygen -t ed25519 -f /path/to/hub_rc_vps_key -N "" -C "hub-rc-vps-whmcs"
 ```
 
-> **Important (open_basedir)** : Si WHMCS tourne sous PHP-FPM avec `open_basedir`, la clé SSH doit se trouver dans un répertoire autorisé. On recommande de la placer directement dans le dossier du module en tant que fichier caché :
+> **Important (open_basedir)**: if WHMCS runs under PHP-FPM with `open_basedir`, the key must live inside an allowed directory. We recommend placing it directly inside the module folder as a hidden file:
 > ```
 > /your-whmcs/modules/addons/hub_rc_vps/.ssh_key
 > ```
-> Les fichiers commençant par `.` sont automatiquement bloqués par nginx-rc (retourne 403), donc la clé n'est pas accessible via le web.
+> Dotfiles are blocked by nginx-rc (403), so the key stays unreachable from the web.
 
-### 2. Ajouter la clé publique sur chaque VPS via RunCloud
+### 2. Add the public key on each VPS via RunCloud
 
-Dans RunCloud > Server > SSH > SSH Key > **Add New** :
-- **Label** : `WHMCS`
-- **User** : `runcloud` (recommandé, évite les problèmes de `PermitRootLogin`)
-- Coller le contenu de la clé publique (`.pub`)
+In RunCloud → Server → SSH → SSH Key → **Add New**:
+- **Label**: `WHMCS`
+- **User**: `runcloud` (recommended; avoids `PermitRootLogin` issues)
+- Paste the public key (`.pub`)
 
-### 3. Configurer le module WHMCS
+### 3. Configure the WHMCS module
 
-Dans WHMCS Admin > Setup > Addon Modules > HUB RunCloud VPS Stats :
-- **SSH Private Key Path** : `/your-whmcs/modules/addons/hub_rc_vps/.ssh_key`
-- **SSH Username** : `runcloud`
+In WHMCS Admin → Setup → Addon Modules → HUB RunCloud VPS Stats:
+- **SSH Private Key Path**: `/your-whmcs/modules/addons/hub_rc_vps/.ssh_key`
+- **SSH Username**: `runcloud`
 
-### Pourquoi `runcloud` et pas `root` ?
+### Why `runcloud` and not `root`?
 
-- Certains serveurs RunCloud ont `PermitRootLogin` désactivé par défaut
-- Le user `runcloud` a accès à toutes les infos nécessaires (`/proc/loadavg`, `free`, `df`, `/proc/uptime`, configs FPM)
-- Moins de risque d'être bloqué par les politiques de sécurité SSH
+- Some RunCloud servers ship with `PermitRootLogin` disabled
+- The `runcloud` user has access to everything we need (`/proc/loadavg`, `free`, `df`, `/proc/uptime`, FPM configs)
+- Less risk of being blocked by SSH security policies
 
-## Sécurité
+## WHMCS service configuration
 
-### Restriction par IP (recommandé)
+For each VPS client service, fill in the **Dedicated IP** field with the VPS IP address. The stats widget will appear automatically on the product details page.
 
-On peut restreindre la clé SSH pour qu'elle ne soit acceptée que depuis l'IP du serveur WHMCS. Sur chaque VPS, dans `/home/runcloud/.ssh/authorized_keys`, préfixer la clé avec :
+Custom SSH port supported via `IP:PORT` format (e.g. `1.2.3.4:2222`).
+
+## Security
+
+### IP restriction (recommended)
+
+You can restrict the SSH key so it is only accepted from the WHMCS server IP. On each VPS, in `/home/runcloud/.ssh/authorized_keys`, prefix the key:
 
 ```
-from="IP_WHMCS",no-port-forwarding,no-X11-forwarding,no-agent-forwarding ssh-ed25519 AAAA... hub-rc-vps-whmcs
+from="WHMCS_IP",no-port-forwarding,no-X11-forwarding,no-agent-forwarding ssh-ed25519 AAAA... hub-rc-vps-whmcs
 ```
 
-> **Note** : RunCloud peut écraser le fichier `authorized_keys` lors de modifications via son interface. Vérifier après chaque modification de clé dans RunCloud.
+> **Note**: RunCloud may overwrite `authorized_keys` when SSH keys are edited via its UI. Re-check after any change.
 
-### Protections intégrées
+### Built-in protections
 
-- **SSRF** : les IP privées et réservées sont rejetées (`FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE`)
-- **XSS** : toutes les sorties sont échappées avec `htmlspecialchars()`
-- **Path traversal** : le nom de langue est sanitisé (`preg_replace('/[^a-z0-9_-]/', '', $language)`)
-- **Fichiers sensibles** : `.ssh_key` et `.debug.log` sont des dotfiles, bloqués par nginx-rc
-- **SQL injection** : utilisation de Capsule ORM (requêtes paramétrées)
+- **SSRF**: private and reserved IPs rejected (`FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE`)
+- **XSS**: all output escaped with `htmlspecialchars()`
+- **Path traversal**: language name sanitized (`preg_replace('/[^a-z0-9_-]/', '', $language)`)
+- **Sensitive files**: `.ssh_key` and `.debug.log` are dotfiles, blocked by nginx-rc
+- **SQL injection**: Capsule ORM (parameterized queries)
 
-## Configuration des services WHMCS
-
-Pour chaque service VPS client, renseignez le champ **Dedicated IP** avec l'adresse IP du serveur VPS. Le widget de stats apparaîtra automatiquement sur la page de détails du produit.
-
-## Dépannage
+## Troubleshooting / Dépannage
 
 ### "SSH authentication failed"
 
-1. Vérifier que la clé WHMCS est bien ajoutée au user `runcloud` (pas `root`) dans RunCloud > SSH
-2. Vérifier que le **SSH Username** dans les settings du module WHMCS est bien `runcloud`
-3. Vérifier que `Prevent root login` n'est pas activé si vous utilisez le user `root`
-4. Purger le cache depuis l'admin du module
+1. Make sure the WHMCS public key is added to the `runcloud` user (not `root`) in RunCloud → SSH
+2. Verify the **SSH Username** module setting is `runcloud`
+3. If using `root`, check that `Prevent root login` is not enabled
+4. Purge the module cache from the admin page
 
 ### "Connection refused"
 
-1. Vérifier que le port 22 est ouvert dans RunCloud > Security > Firewall (type Global)
-2. Vérifier que **fail2ban** n'a pas banni l'IP du serveur WHMCS (des tentatives échouées peuvent causer un ban)
-3. Pour débanner : `fail2ban-client unban IP_WHMCS` sur le VPS concerné
+1. Check port 22 is open in RunCloud → Security → Firewall (Global type)
+2. Check that **fail2ban** has not banned the WHMCS IP (failed attempts can trigger bans)
+3. To unban: `fail2ban-client unban WHMCS_IP` on the VPS
 
 ### "Password change required"
 
-Certains serveurs demandent un changement de mot de passe root à la première connexion. Se connecter manuellement une fois pour régler le problème, ou utiliser le user `runcloud` à la place.
+Some servers require a root password change on first connection. Either log in manually once or switch to the `runcloud` user.
 
 ## Architecture
 
 ```
 modules/addons/hub_rc_vps/
-├── hub_rc_vps.php      # Module principal (config, admin, test SSH)
-├── hooks.php           # Hook ClientAreaProductDetailsOutput + rendu HTML
+├── hub_rc_vps.php        # Main module (config, admin, SSH test)
+├── hooks.php             # ClientAreaProductDetailsOutput hook + HTML rendering
 ├── lib/
-│   ├── ServerStats.php # Client SSH (phpseclib) + parsing stats système
-│   └── Cache.php       # Cache DB (table mod_hub_rc_vps_cache)
+│   ├── ServerStats.php   # SSH client (phpseclib) + system stats parser
+│   └── Cache.php         # DB cache (mod_hub_rc_vps_cache)
 ├── lang/
-│   ├── english.php     # Traductions anglaises
-│   └── french.php      # Traductions françaises
-├── .ssh_key            # Clé SSH privée (non commité, protégé par nginx)
-├── .debug.log          # Log de debug (non commité, protégé par nginx)
-└── vendor/             # phpseclib (composer)
+│   ├── english.php
+│   └── french.php
+├── .ssh_key              # Private SSH key (NOT committed, blocked by nginx)
+├── .debug.log            # Debug log (NOT committed, blocked by nginx)
+└── vendor/               # phpseclib (composer)
 ```
 
-## Détection des webapps RunCloud
+## RunCloud webapp detection
 
-Le module détecte les webapps en scannant les configs FPM pool de RunCloud :
-```
-/etc/php*rc/fpm.d/app-*.conf
-```
-Format extrait : `app-name|phpversion` (ex: `app-monsite|82` → PHP 8.2)
+The module detects RunCloud webapps by scanning FPM sockets in `/run/`, mapping each socket to its `php-fpm: master` parent process to extract the PHP version. Format: `app-name|phpversion` (e.g. `app-mysite|82` → PHP 8.2).
 
-## Licence
+This approach works for both `root` and `runcloud` SSH users (no privileged file access required).
 
-Propriétaire - Collectif HUB
+## Contributing
+
+Pull requests are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+For bug reports and feature requests, please use the [GitHub issue tracker](https://github.com/collectifweb/HUB_RC-VPS/issues).
+
+## License
+
+[MIT](LICENSE) © [Collectif HUB](https://collectif-hub.ca)
