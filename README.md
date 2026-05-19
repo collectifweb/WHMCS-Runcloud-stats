@@ -12,6 +12,12 @@ Built by [Alexandre Alves](mailto:alexandre@collectifweb.ca) at [Collectif WEB](
 
 ---
 
+## Preview
+
+![Widget preview — server stats panel on the WHMCS client product page](docs/widget-preview.png)
+
+---
+
 ## Features / Fonctionnalités
 
 - **Load average** (1 / 5 / 15 min) with color indicator
