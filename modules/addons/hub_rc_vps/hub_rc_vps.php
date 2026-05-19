@@ -6,7 +6,8 @@
  * Displays VPS server statistics (load, memory, disk, uptime) on the
  * client product details page by connecting via SSH to the VPS servers.
  *
- * @author Collectif HUB
+ * @author  Alexandre Alves <alexandre@collectifweb.ca>
+ * @link    https://collectif-web.ca
  * @version 1.0.0
  */
 
@@ -26,7 +27,7 @@ function hub_rc_vps_config()
     return [
         'name' => 'HUB RunCloud VPS Stats',
         'description' => 'Displays VPS server statistics (load, memory, disk, uptime) on the client product details page via SSH.',
-        'author' => 'Collectif HUB',
+        'author' => '<a href="https://collectif-web.ca" target="_blank">Collectif WEB</a> — Alexandre Alves',
         'language' => 'english',
         'version' => '1.0.0',
         'fields' => [

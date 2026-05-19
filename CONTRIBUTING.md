@@ -36,7 +36,7 @@ Do not add AI-generated co-author trailers.
 
 ## Security disclosures
 
-For security issues, **do not open a public issue**. Email security@collectif-hub.ca instead. We aim to acknowledge reports within 72 hours.
+For security issues, **do not open a public issue**. Email [alexandre@collectifweb.ca](mailto:alexandre@collectifweb.ca) instead. We aim to acknowledge reports within 72 hours.
 
 ## License
 

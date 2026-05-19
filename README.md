@@ -6,7 +6,7 @@
 
 WHMCS addon module that displays live VPS server statistics (load, memory, disk, uptime, web apps) directly on the client product details page, by connecting to the VPS over SSH.
 
-Originally built for [Collectif HUB](https://collectif-hub.ca) and released as open source for the WHMCS / RunCloud community.
+Built by [Alexandre Alves](mailto:alexandre@collectifweb.ca) at [Collectif WEB](https://collectif-web.ca) and released as open source for the WHMCS / RunCloud community.
 
 > Module addon WHMCS qui affiche les statistiques temps réel des serveurs VPS (charge, mémoire, disque, uptime, applications web) directement sur la page produit du client, via une connexion SSH.
 
@@ -160,4 +160,4 @@ For bug reports and feature requests, please use the [GitHub issue tracker](http
 
 ## License
 
-[MIT](LICENSE) © [Collectif HUB](https://collectif-hub.ca)
+[MIT](LICENSE) © [Alexandre Alves](mailto:alexandre@collectifweb.ca) — [Collectif WEB](https://collectif-web.ca)

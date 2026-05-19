@@ -1,13 +1,15 @@
 {
-    "name": "collectif-hub/hub-rc-vps",
+    "name": "collectif-web/hub-rc-vps",
     "description": "WHMCS addon module - VPS server stats via SSH (RunCloud-aware)",
     "type": "whmcs-addon",
     "license": "MIT",
     "homepage": "https://github.com/collectifweb/HUB_RC-VPS",
     "authors": [
         {
-            "name": "Collectif HUB",
-            "homepage": "https://collectif-hub.ca"
+            "name": "Alexandre Alves",
+            "email": "alexandre@collectifweb.ca",
+            "homepage": "https://collectif-web.ca",
+            "role": "Developer"
         }
     ],
     "require": {
